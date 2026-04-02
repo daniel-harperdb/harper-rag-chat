@@ -1,14 +1,12 @@
 import { Resource, tables } from 'harperdb';
-import OpenAI from 'openai';
+import { embed } from './embeddings.js';
 
-const openai = new OpenAI();
-const EMBEDDING_MODEL = 'text-embedding-3-small';
 const SIMILARITY_THRESHOLD = 0.5;
 
 /**
- * Custom resource for semantic search across the knowledge base.
+ * Semantic search across the knowledge base.
  * POST /KnowledgeSearch/ with { "query": "your question" }
- * Returns the top matching chunks ranked by vector similarity.
+ * Embeds the query locally (no API key) and returns top matching chunks.
  */
 export class KnowledgeSearch extends Resource {
 	async post(data: { query: string; limit?: number }) {
@@ -16,15 +14,8 @@ export class KnowledgeSearch extends Resource {
 			throw new Error('query is required');
 		}
 
-		// Generate query embedding
-		const embeddingRes = await openai.embeddings.create({
-			model: EMBEDDING_MODEL,
-			input: data.query,
-			encoding_format: 'float',
-		});
-		const queryVector = embeddingRes.data[0].embedding;
+		const queryVector = await embed(data.query);
 
-		// Vector search using Harper's HNSW index
 		const results = await tables.KnowledgeChunk.search({
 			select: ['id', 'content', 'source', '$distance'],
 			conditions: {

@@ -1,8 +1,8 @@
 import { Resource, tables } from 'harperdb';
 import OpenAI from 'openai';
+import { embed } from './embeddings.js';
 
 const openai = new OpenAI();
-const EMBEDDING_MODEL = 'text-embedding-3-small';
 const CHAT_MODEL = 'gpt-4o-mini';
 const SIMILARITY_THRESHOLD = 0.5;
 
@@ -11,14 +11,9 @@ const SIMILARITY_THRESHOLD = 0.5;
  *
  * POST /Chat/ — Send a message to a conversation.
  *   Body: { "conversationId": "...", "message": "..." }
- *   Returns: streamed SSE response with assistant's reply.
  *
- * The flow:
- *   1. Store user message in Harper (Message table)
- *   2. Embed the query and vector-search the KnowledgeChunk table
- *   3. Load conversation history from Harper
- *   4. Stream the LLM response back via SSE
- *   5. Store the complete assistant response in Harper
+ * Embeddings use local ONNX (no API key needed for search).
+ * Chat completions use OpenAI gpt-4o-mini (requires OPENAI_API_KEY).
  */
 export class Chat extends Resource {
 	async post(data: { conversationId: string; message: string }) {
@@ -38,16 +33,10 @@ export class Chat extends Resource {
 			createdAt: now,
 		});
 
-		// 2. Vector search for relevant knowledge
+		// 2. Embed query locally and vector-search knowledge base
 		let context = '';
 		try {
-			const embeddingRes = await openai.embeddings.create({
-				model: EMBEDDING_MODEL,
-				input: message,
-				encoding_format: 'float',
-			});
-			const queryVector = embeddingRes.data[0].embedding;
-
+			const queryVector = await embed(message);
 			const results = await tables.KnowledgeChunk.search({
 				select: ['content', 'source', '$distance'],
 				conditions: {
@@ -58,23 +47,19 @@ export class Chat extends Resource {
 				},
 				limit: 3,
 			});
-
 			if (results && results.length > 0) {
 				context = results
 					.map((r: any) => `[Source: ${r.source}]\n${r.content}`)
 					.join('\n\n---\n\n');
 			}
 		} catch {
-			// Knowledge base may be empty — chat without RAG
+			// Knowledge base may be empty — chat without RAG context
 		}
 
 		// 3. Load conversation history
 		const history = await tables.Message.search({
 			select: ['role', 'content', 'createdAt'],
-			conditions: {
-				attribute: 'conversationId',
-				value: conversationId,
-			},
+			conditions: { attribute: 'conversationId', value: conversationId },
 			sort: { attribute: 'createdAt' },
 			limit: 20,
 		});
@@ -83,7 +68,7 @@ export class Chat extends Resource {
 			{
 				role: 'system',
 				content: context
-					? `You are a helpful assistant. Answer questions using the following knowledge base context when relevant. If the context doesn't contain relevant information, say so and answer from your general knowledge.\n\n--- KNOWLEDGE BASE ---\n${context}\n--- END KNOWLEDGE BASE ---`
+					? `You are a helpful assistant. Answer questions using the following knowledge base context when relevant.\n\n--- KNOWLEDGE BASE ---\n${context}\n--- END KNOWLEDGE BASE ---`
 					: 'You are a helpful assistant.',
 			},
 			...((history || []) as any[]).map((m) => ({
@@ -92,7 +77,7 @@ export class Chat extends Resource {
 			})),
 		];
 
-		// 4. Get LLM response (non-streaming for simplicity in resource)
+		// 4. Get LLM response
 		const completion = await openai.chat.completions.create({
 			model: CHAT_MODEL,
 			messages,
@@ -110,10 +95,6 @@ export class Chat extends Resource {
 			createdAt: responseTime,
 		});
 
-		return {
-			role: 'assistant',
-			content: assistantContent,
-			conversationId,
-		};
+		return { role: 'assistant', content: assistantContent, conversationId };
 	}
 }

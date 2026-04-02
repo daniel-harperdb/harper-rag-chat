@@ -44,7 +44,7 @@ The fastest way to get started — no local setup required.
 
 1. Click the **Run on Replit** button above (or [open directly](https://replit.com/new/github/daniel-harperdb/harper-rag-chat))
 2. In the Replit sidebar, go to **Secrets** and add:
-   - `OPENAI_API_KEY` — your OpenAI API key ([get one here](https://platform.openai.com/api-keys))
+   - `OPENAI_API_KEY` — your OpenAI API key ([get one here](https://platform.openai.com/api-keys)) — used only for chat completions; embeddings run locally via ONNX, no API key needed
 3. Click **Run** — Harper installs and starts automatically
 4. Open the webview at the URL Replit provides (port 9926 → port 80)
 
@@ -119,14 +119,15 @@ Harper Fabric is the managed cloud — deploy with one command (free tier, no cr
 
 ## How RAG Works
 
-1. **Ingest**: User uploads text → chunked into ~500 char segments → OpenAI generates embeddings → stored in Harper with HNSW vector index
-2. **Query**: User asks a question → embedded → Harper vector search finds top 3 matching chunks → chunks + conversation history sent to GPT-4o-mini → response stored in Harper
+1. **Ingest**: User uploads text → chunked into ~500 char segments →  generates 384-dim embeddings locally (no API call) → stored in Harper with HNSW vector index
+2. **Query**: User asks a question → embedded locally → Harper vector search finds top 3 matching chunks → chunks + conversation history sent to GPT-4o-mini → response stored in Harper
 3. **Persist**: Every message (user and assistant) is stored in the Message table with full conversation threading
 
 ## Tech Stack
 
 - **Harper** — database, vector search, REST API, WebSocket, static serving ([harper.fast](https://harper.fast))
-- **OpenAI** — text-embedding-3-small (embeddings) + gpt-4o-mini (chat)
+- **@huggingface/transformers** — local ONNX embeddings via  (no API key, runs in-process)
+- **OpenAI** —  for chat completions only (requires )
 - **Vanilla JS** — zero-framework frontend, served by Harper's static component
 
 ## License

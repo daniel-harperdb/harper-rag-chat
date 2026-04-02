@@ -16,6 +16,7 @@
 		"agent:skills:update": "npx -y skills@latest add harperfast/skills --all --yes"
 	},
 	"dependencies": {
+		"@huggingface/transformers": "^3.0.0",
 		"openai": "^6.33.0"
 	},
 	"devDependencies": {
