@@ -1,0 +1,7 @@
+type KnowledgeChunk @table {
+	id: ID @primaryKey
+	content: String
+	source: String @indexed
+	embedding: [Float] @indexed(type: "HNSW")
+	createdAt: Float
+}

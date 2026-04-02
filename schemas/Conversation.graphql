@@ -1,0 +1,5 @@
+type Conversation @table @export {
+	id: ID @primaryKey
+	title: String
+	createdAt: Float
+}

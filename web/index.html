@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harper RAG Chat</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Sidebar: Conversations -->
+      <aside class="sidebar">
+        <h2>Conversations</h2>
+        <button class="new-chat-btn" id="new-chat">+ New Chat</button>
+        <ul class="conversation-list" id="conversation-list"></ul>
+        <div class="branding">
+          Powered by <a href="https://harperdb.io" target="_blank">Harper</a>
+        </div>
+      </aside>
+
+      <!-- Main chat area -->
+      <main class="chat-area">
+        <div class="chat-header" id="chat-header">
+          Harper RAG Chat <span>vector search + real-time persistence</span>
+        </div>
+        <div class="messages" id="messages">
+          <div class="empty-state">
+            <h3>Welcome to Harper RAG Chat</h3>
+            <p>Upload knowledge on the right, then ask questions here.</p>
+            <p>Everything runs on Harper: database, vector search, API, and this page.</p>
+          </div>
+        </div>
+        <div class="input-area">
+          <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Ask a question..." autocomplete="off" />
+            <button type="submit" id="send-btn">Send</button>
+          </form>
+        </div>
+      </main>
+
+      <!-- Right panel: Knowledge Base -->
+      <aside class="knowledge-panel">
+        <h2>Knowledge Base</h2>
+
+        <textarea id="knowledge-content" placeholder="Paste document text here..."></textarea>
+        <input type="text" id="knowledge-source" placeholder="Source name (e.g. product-docs.md)" />
+        <button class="ingest-btn" id="ingest-btn">Ingest into Knowledge Base</button>
+        <div class="status-msg" id="ingest-status"></div>
+
+        <hr class="divider" />
+
+        <div class="search-section">
+          <h3>Test Vector Search</h3>
+          <input type="text" id="search-input" placeholder="Search knowledge base..." />
+          <div class="search-results" id="search-results"></div>
+        </div>
+      </aside>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

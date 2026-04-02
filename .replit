@@ -1,0 +1,17 @@
+run = "npm run replit:dev"
+entrypoint = "resources/Chat.ts"
+hidden = [".config", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+HARPER_ENV = "replit"
+
+[[ports]]
+localPort = 9926
+externalPort = 80
+
+[deployment]
+run = ["sh", "-c", "npm run replit:dev"]
+deploymentTarget = "cloudrun"

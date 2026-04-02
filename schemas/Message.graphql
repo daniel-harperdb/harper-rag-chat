@@ -1,0 +1,7 @@
+type Message @table @export {
+	id: ID @primaryKey
+	conversationId: ID @indexed
+	role: String
+	content: String
+	createdAt: Float
+}
