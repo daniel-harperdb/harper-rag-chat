@@ -1,6 +1,6 @@
 # Harper RAG Chat
 
-[![Run on Replit](https://replit.com/badge/github/daniel-harperdb/harper-rag-chat)](https://replit.com/new/github/daniel-harperdb/harper-rag-chat)
+[![Run on Replit](https://replit.com/badge/github/daniel-harperdb/harper-starter)](https://replit.com/new/github/daniel-harperdb/harper-starter)
 
 AI Chat with Knowledge Base — powered entirely by Harper.
 
@@ -42,7 +42,7 @@ web/
 
 The fastest way to get started — no local setup required.
 
-1. Click the **Run on Replit** button above (or [open directly](https://replit.com/new/github/daniel-harperdb/harper-rag-chat))
+1. Click the **Run on Replit** button above (or [open directly](https://replit.com/new/github/daniel-harperdb/harper-starter))
 2. In the Replit sidebar, go to **Secrets** and add:
    - `OPENAI_API_KEY` — your OpenAI API key ([get one here](https://platform.openai.com/api-keys)) — used only for chat completions; embeddings run locally via ONNX, no API key needed
 3. Click **Run** — Harper installs and starts automatically
